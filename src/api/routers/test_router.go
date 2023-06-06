@@ -22,7 +22,7 @@ func TestRouter(r *gin.RouterGroup){
 
 	r.GET("/binder/uri/:id/:name", h.UriBinder)
 
-	r.GET("/binder/body", h.BodyBinder)
+	r.POST("/binder/body", h.BodyBinder)
 
 	r.GET("/binder/form", h.FormBinder)
 
