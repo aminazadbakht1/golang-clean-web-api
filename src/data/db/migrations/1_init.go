@@ -49,7 +49,7 @@ func Down_1() {
 
 func createDefaultInformation(database *gorm.DB) {
 
-	adminRole := &models.Role{Name: constants.DefaultRoleName}
+	adminRole := &models.Role{Name: constants.AdminRoleName}
 	createRoleIfNotExists(database, adminRole)
 	defaultRole := &models.Role{Name: constants.DefaultRoleName}
 	createRoleIfNotExists(database, defaultRole)
