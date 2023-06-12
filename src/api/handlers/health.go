@@ -24,11 +24,5 @@ func NewHealthHandler() *HealthHandler {
 // @Failure 400 {object} helper.BaseHttpResponse "Failed"
 // @Router /v1/health/ [get]
 func (h *HealthHandler) Health(c *gin.Context) {
-	c.JSON(http.StatusOK, helper.GenerateBaseResponse("Working...", true, 1))
-	return
-}
-
-func (h *HealthHandler) HealthPost(c *gin.Context) {
-	c.JSON(http.StatusOK, "Working...")
-	return
+	c.JSON(http.StatusOK, helper.GenerateBaseResponse("Working!", true, 0))
 }

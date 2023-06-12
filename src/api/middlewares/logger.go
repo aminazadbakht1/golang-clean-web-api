@@ -6,9 +6,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gin-gonic/gin"
 	"github.com/aminazadbakht1/golang-clean-web-api/config"
 	"github.com/aminazadbakht1/golang-clean-web-api/pkg/logging"
+	"github.com/gin-gonic/gin"
 )
 
 type bodyLogWriter struct {
@@ -33,6 +33,7 @@ func DefaultStructuredLogger(cfg *config.Config) gin.HandlerFunc {
 
 func structuredLogger(logger logging.Logger) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		print(c.FullPath())
 		if strings.Contains(c.FullPath(), "swagger") {
 			c.Next()
 		} else {

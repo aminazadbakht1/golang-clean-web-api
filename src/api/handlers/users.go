@@ -19,66 +19,6 @@ func NewUsersHandler(cfg *config.Config) *UsersHandler {
 	return &UsersHandler{service: service}
 }
 
-// UserById godoc
-// @Summary Send Otp to user
-// @Description Send Otp to user
-// @Tags Users
-// @Accept  json
-// @Produce  json
-// @Param Request body dto.GetOtpRequest true "GetOtpRequest"
-// @Success 201 {object} helper.BaseHttpResponse "Success"
-// @Failure 400 {object} helper.BaseHttpResponse "Failed"
-// @Failure 409 {object} helper.BaseHttpResponse "Failed"
-// @Router /v1/users/send-otp [post]
-func (h *UsersHandler) SendOtp(c *gin.Context) {
-	req := new(dto.GetOtpRequest)
-	err := c.ShouldBindJSON(&req)
-	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest,
-			helper.GenerateBaseResponseWithError(nil, false, -1, err))
-		return
-	}
-	err = h.service.SendOtp(req)
-	if err != nil {
-		c.AbortWithStatusJSON(helper.TranslateErrorToStatusCode(err),
-			helper.GenerateBaseResponseWithError(nil, false, -1, err))
-		return
-	}
-
-	//Call internal Sms Service...
-	c.JSON(http.StatusCreated, helper.GenerateBaseResponse(nil, true, 0))
-}
-
-// RegisterLoginByMobileNumber godoc
-// @Summary Register Login By MobileNumber
-// @Description Register Login By MobileNumber
-// @Tags Users
-// @Accept  json
-// @Produce  json
-// @Param Request body dto.RegisterLoginByMobileRequest true "RegisterLoginByMobileRequest"
-// @Success 201 {object} helper.BaseHttpResponse "Success"
-// @Failure 400 {object} helper.BaseHttpResponse "Failed"
-// @Failure 409 {object} helper.BaseHttpResponse "Failed"
-// @Router /v1/users/login-by-mobile [post]
-func (h *UsersHandler) RegisterLoginByMobileNumber(c *gin.Context) {
-	req := new(dto.RegisterLoginByMobileRequest)
-	err := c.ShouldBindJSON(&req)
-	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest,
-			helper.GenerateBaseResponseWithError(nil, false, -1, err))
-		return
-	}
-	token, err := h.service.RegisterLoginByMobileNumber(req)
-	if err != nil {
-		c.AbortWithStatusJSON(helper.TranslateErrorToStatusCode(err),
-			helper.GenerateBaseResponseWithError(nil, false, -1, err))
-		return
-	}
-
-	//Call internal Sms Service...
-	c.JSON(http.StatusCreated, helper.GenerateBaseResponse(token, true, 0))
-}
-
 // LoginByUsername godoc
 // @Summary LoginByUsername
 // @Description LoginByUsername
@@ -95,17 +35,17 @@ func (h *UsersHandler) LoginByUsername(c *gin.Context) {
 	err := c.ShouldBindJSON(&req)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest,
-			helper.GenerateBaseResponseWithValidationError(nil, false, -1, err))
+			helper.GenerateBaseResponseWithValidationError(nil, false, helper.ValidationError, err))
 		return
 	}
 	token, err := h.service.LoginByUsername(req)
 	if err != nil {
 		c.AbortWithStatusJSON(helper.TranslateErrorToStatusCode(err),
-			helper.GenerateBaseResponseWithError(nil, false, -1, err))
+			helper.GenerateBaseResponseWithError(nil, false, helper.InternalError, err))
 		return
 	}
 
-	c.JSON(http.StatusCreated, helper.GenerateBaseResponse(token, true, 0))
+	c.JSON(http.StatusCreated, helper.GenerateBaseResponse(token, true, helper.Success))
 }
 
 // RegisterByUsername godoc
@@ -124,15 +64,73 @@ func (h *UsersHandler) RegisterByUsername(c *gin.Context) {
 	err := c.ShouldBindJSON(&req)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest,
-			helper.GenerateBaseResponseWithValidationError(nil, false, -1, err))
+			helper.GenerateBaseResponseWithValidationError(nil, false, helper.ValidationError, err))
 		return
 	}
 	err = h.service.RegisterByUsername(req)
 	if err != nil {
 		c.AbortWithStatusJSON(helper.TranslateErrorToStatusCode(err),
-			helper.GenerateBaseResponseWithError(nil, false, -1, err))
+			helper.GenerateBaseResponseWithError(nil, false, helper.InternalError, err))
 		return
 	}
 
-	c.JSON(http.StatusCreated, helper.GenerateBaseResponse(nil, true, 0))
+	c.JSON(http.StatusCreated, helper.GenerateBaseResponse(nil, true, helper.Success))
+}
+
+// RegisterLoginByMobileNumber godoc
+// @Summary RegisterLoginByMobileNumber
+// @Description RegisterLoginByMobileNumber
+// @Tags Users
+// @Accept  json
+// @Produce  json
+// @Param Request body dto.RegisterLoginByMobileRequest true "RegisterLoginByMobileRequest"
+// @Success 201 {object} helper.BaseHttpResponse "Success"
+// @Failure 400 {object} helper.BaseHttpResponse "Failed"
+// @Failure 409 {object} helper.BaseHttpResponse "Failed"
+// @Router /v1/users/login-by-mobile [post]
+func (h *UsersHandler) RegisterLoginByMobileNumber(c *gin.Context) {
+	req := new(dto.RegisterLoginByMobileRequest)
+	err := c.ShouldBindJSON(&req)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest,
+			helper.GenerateBaseResponseWithValidationError(nil, false, helper.ValidationError, err))
+		return
+	}
+	token, err := h.service.RegisterLoginByMobileNumber(req)
+	if err != nil {
+		c.AbortWithStatusJSON(helper.TranslateErrorToStatusCode(err),
+			helper.GenerateBaseResponseWithError(nil, false, helper.InternalError, err))
+		return
+	}
+
+	c.JSON(http.StatusCreated, helper.GenerateBaseResponse(token, true, helper.Success))
+}
+
+// SendOtp godoc
+// @Summary Send otp to user
+// @Description Send otp to user
+// @Tags Users
+// @Accept  json
+// @Produce  json
+// @Param Request body dto.GetOtpRequest true "GetOtpRequest"
+// @Success 201 {object} helper.BaseHttpResponse "Success"
+// @Failure 400 {object} helper.BaseHttpResponse "Failed"
+// @Failure 409 {object} helper.BaseHttpResponse "Failed"
+// @Router /v1/users/send-otp [post]
+func (h *UsersHandler) SendOtp(c *gin.Context) {
+	req := new(dto.GetOtpRequest)
+	err := c.ShouldBindJSON(&req)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest,
+			helper.GenerateBaseResponseWithValidationError(nil, false, helper.ValidationError, err))
+		return
+	}
+	err = h.service.SendOtp(req)
+	if err != nil {
+		c.AbortWithStatusJSON(helper.TranslateErrorToStatusCode(err),
+			helper.GenerateBaseResponseWithError(nil, false, helper.InternalError, err))
+		return
+	}
+	// Call internal SMS service
+	c.JSON(http.StatusCreated, helper.GenerateBaseResponse(nil, true, helper.Success))
 }

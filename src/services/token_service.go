@@ -55,38 +55,37 @@ func (s *TokenService) GenerateToken(token *tokenDto) (*dto.TokenDetail, error) 
 	var err error
 	td.AccessToken, err = at.SignedString([]byte(s.cfg.JWT.Secret))
 
-	if err != nil{
+	if err != nil {
 		return nil, err
 	}
 
 	rtc := jwt.MapClaims{}
-	rtc[constants.UserIdKey]= token.UserId
-	atc[constants.ExpireTimeKey] = td.RefreshTokenExpireTime
+
+	rtc[constants.UserIdKey] = token.UserId
+	rtc[constants.ExpireTimeKey] = td.RefreshTokenExpireTime
 
 	rt := jwt.NewWithClaims(jwt.SigningMethodHS256, rtc)
 
 	td.RefreshToken, err = rt.SignedString([]byte(s.cfg.JWT.RefreshSecret))
 
-	if err != nil{
+	if err != nil {
 		return nil, err
 	}
 
 	return td, nil
 }
 
-func (s *TokenService) VerifyToken(token string)(*jwt.Token, error){
-	at, err := jwt.Parse(token, func(token *jwt.Token) (interface{}, error){
+func (s *TokenService) VerifyToken(token string) (*jwt.Token, error) {
+	at, err := jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
 		_, ok := token.Method.(*jwt.SigningMethodHMAC)
-		if !ok{
+		if !ok {
 			return nil, &service_errors.ServiceError{EndUserMessage: service_errors.UnExpectedError}
 		}
-
 		return []byte(s.cfg.JWT.Secret), nil
 	})
-	if err != nil{
+	if err != nil {
 		return nil, err
 	}
-
 	return at, nil
 }
 
